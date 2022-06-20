@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EFProject.Data.Models
 {
@@ -16,10 +14,19 @@ namespace EFProject.Data.Models
         {
         }
 
-        //Table example. include Student model in your models folder
-        public virtual DbSet<Student> Student { get; set; }
-        //View example. include StudentClassroomView model in your models folder
-        public virtual DbQuery<StudentClassroomView> StudentClassroomView { get; set; }
+        //Table sample. include Foo model in your models folder.
+        public virtual DbSet<Foo> Foo { get; set; }
+
+        //For models that doesn't exist in your database as it is
+        //but retrieved with an SQL query or SP.
+        //include FooFromQuery model in your models folder.
+        //this is how you can use in your repository:
+        //dbContext.FooFromQuery.FromSqlRaw("SELECT Foo1, Foo2 FROM FooTable").ToList();
+        [NotMapped]
+        public virtual DbSet<FooFromQuery> FooFromQuery { get; set; }
+
+        //View sample. Include FooView model in your models folder
+        public virtual DbQuery<FooView> FooView { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -32,8 +39,13 @@ namespace EFProject.Data.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
+
             //add if you use views
-            modelBuilder.Query<StudentClassroomView>().ToView("StudentClassroomView");
+            modelBuilder.Query<FooView>().HasNoKey().ToView("FooView");
+
+            //add if you use notmapped models
+            modelBuilder.Entity<FooFromQuery>().HasNoKey();
+
         }
     }
 }
